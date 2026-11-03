@@ -41,7 +41,7 @@ La demo reproduce salidas grabadas de una ejecución real y calcula la recuperac
 claves, sin GPU, sin Docker y sin descargar parsers.
 
 ```bash
-uvx --from git+https://github.com/diegoperezg7/parsearena@v0.1.1 parsearena demo
+uvx --from git+https://github.com/diegoperezg7/parsearena@v0.1.2 parsearena demo
 ```
 
 o desde un clon:
@@ -217,7 +217,7 @@ MinerU corre con su esfuerzo `medium` (modelos locales de layout, OCR, tablas y 
 visión y lenguaje) y con su telemetría desactivada (`MINERU_TELEMETRY_DISABLED=1`). parsearena no tiene
 telemetría.
 
-## Documentos de la demo
+## Documentos de terceros
 
 | Fichero | Páginas | Licencia |
 | --- | --- | --- |
@@ -226,7 +226,9 @@ telemetría.
 | [NACA Report 1135, *Equations, Tables, and Charts for Compressible Flow* (1953)](https://ntrs.nasa.gov/citations/19930091059) | p. 613, rasterizada a página solo imagen | Dominio público (obra del gobierno de EE. UU.) |
 
 Las páginas se extrajeron sin cambios, salvo la de NACA, que se volvió a renderizar como imagen para
-que no tenga capa de texto, como un escaneo real. Las preguntas están en
+que no tenga capa de texto, como un escaneo real. Estos extractos no están bajo la licencia MIT de
+parsearena. Títulos, autores, fuentes, licencias y la atribución CC BY completos están en
+[`src/parsearena/demo/pdfs/NOTICE.md`](src/parsearena/demo/pdfs/NOTICE.md), que va dentro del wheel. Las preguntas están en
 [`src/parsearena/demo/questions.yaml`](src/parsearena/demo/questions.yaml).
 
 ## Hoja de ruta

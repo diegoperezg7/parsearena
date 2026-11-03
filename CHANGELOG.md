@@ -1,6 +1,11 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.2] - 2026-11-03
+
+### Added
+- `src/parsearena/demo/pdfs/NOTICE.md` with title, authors, source, license and changes for each
+  bundled demo PDF, including the full CC BY 4.0 attribution for the DPO paper. It ships in the wheel.
+- README section "Third-party documents" (EN/ES) pointing to it.
 
 ### Changed
 - The default Mistral model for `--gen-questions` is now `ministral-8b-latest` (was `mistral-small-latest`).

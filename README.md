@@ -41,7 +41,7 @@ The demo replays outputs recorded from a real run and computes retrieval live. N
 no Docker, no parser downloads.
 
 ```bash
-uvx --from git+https://github.com/diegoperezg7/parsearena@v0.1.1 parsearena demo
+uvx --from git+https://github.com/diegoperezg7/parsearena@v0.1.2 parsearena demo
 ```
 
 or from a clone:
@@ -211,7 +211,7 @@ their licenses apply to your use of them.
 MinerU runs at its `medium` effort (local layout, OCR, table and formula models, no vision-language
 model) with its telemetry disabled (`MINERU_TELEMETRY_DISABLED=1`). parsearena itself has no telemetry.
 
-## Demo documents
+## Third-party documents
 
 | File | Pages used | License |
 | --- | --- | --- |
@@ -220,7 +220,9 @@ model) with its telemetry disabled (`MINERU_TELEMETRY_DISABLED=1`). parsearena i
 | [NACA Report 1135, *Equations, Tables, and Charts for Compressible Flow* (1953)](https://ntrs.nasa.gov/citations/19930091059) | p. 613, rasterized to an image-only page | Public domain (U.S. government work) |
 
 The pages were extracted unchanged, except the NACA page, which was re-rendered as an image so that it
-has no text layer, like a real scan. The question set is in
+has no text layer, like a real scan. These excerpts are not covered by parsearena's MIT license. Full
+titles, authors, sources, licenses and the CC BY attribution are in
+[`src/parsearena/demo/pdfs/NOTICE.md`](src/parsearena/demo/pdfs/NOTICE.md), which ships in the wheel. The question set is in
 [`src/parsearena/demo/questions.yaml`](src/parsearena/demo/questions.yaml).
 
 ## Roadmap
