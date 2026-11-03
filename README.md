@@ -146,7 +146,7 @@ flowchart LR
 
 Environment variables: `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, `MISTRAL_API_KEY` (only for
 `--gen-questions` with that provider), `OLLAMA_HOST`, `PARSEARENA_HOME` (where environments live),
-`LLAMA_CPP_BINARY`. See [.env.example](.env.example). `parsearena parsers` lists pinned versions and
+`LLAMA_CPP_BINARY`, `PARSEARENA_LLM_TIMEOUT` (seconds per LLM call, default 300). See [.env.example](.env.example). `parsearena parsers` lists pinned versions and
 what is installed.
 
 Questions file:

@@ -70,7 +70,8 @@ class LLM:
         from openai import OpenAI
 
         self.base_url = base_url
-        self._client = OpenAI(base_url=base_url, api_key=key, max_retries=0, timeout=300)
+        self.timeout = float(os.environ.get("PARSEARENA_LLM_TIMEOUT", "300"))
+        self._client = OpenAI(base_url=base_url, api_key=key, max_retries=0, timeout=self.timeout)
 
     @property
     def local(self) -> bool:
@@ -108,6 +109,13 @@ class LLM:
                     temperature=0.2,
                     extra_body=extra,
                 )
+            except openai.APITimeoutError as exc:
+                if self.local or attempt == 4:
+                    raise UserError(
+                        f"{self.provider} did not answer within {self.timeout:.0f}s.",
+                        "The server may be busy or still loading the model. Try again, "
+                        "or raise the limit with PARSEARENA_LLM_TIMEOUT (seconds).",
+                    ) from exc
             except openai.APIConnectionError as exc:
                 if self.local:
                     raise UserError(

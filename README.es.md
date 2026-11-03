@@ -148,8 +148,8 @@ flowchart LR
 | `--out` | `parsearena-out` | Carpeta de salida (visor, `outputs.json`, `results.json`, logs) |
 
 Variables de entorno: `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, `MISTRAL_API_KEY` (solo para
-`--gen-questions` con ese proveedor), `OLLAMA_HOST`, `PARSEARENA_HOME` (dónde viven los entornos) y
-`LLAMA_CPP_BINARY`. Mira [.env.example](.env.example). `parsearena parsers` muestra versiones y qué
+`--gen-questions` con ese proveedor), `OLLAMA_HOST`, `PARSEARENA_HOME` (dónde viven los entornos),
+`LLAMA_CPP_BINARY` y `PARSEARENA_LLM_TIMEOUT` (segundos por llamada al LLM, 300 por defecto). Mira [.env.example](.env.example). `parsearena parsers` muestra versiones y qué
 está instalado.
 
 Fichero de preguntas:

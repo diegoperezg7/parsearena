@@ -116,3 +116,13 @@ def test_local_model_is_free_and_never_blocked(monkeypatch):
     llm._client = _Client(lambda **k: _Resp("hi"))
     assert llm.complete("s", "p") == "hi"
     assert llm.spent == 0.0
+
+
+def test_timeout_is_not_reported_as_unreachable(monkeypatch):
+    def slow(**k):
+        raise openai.APITimeoutError(request=_req())
+
+    llm = LLM(provider="ollama", model="qwen3:4b")
+    llm._client = _Client(slow)
+    with pytest.raises(UserError, match="did not answer within"):
+        llm.complete("s", "p")
