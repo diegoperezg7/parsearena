@@ -95,7 +95,7 @@ select { appearance: none; font: 500 .88rem var(--font); color: var(--text); bac
 .pane-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px 8px 12px; border-bottom: 1px solid var(--border); min-height: 52px; }
 .pane-head .t { font-weight: 600; font-size: .9rem; }
 .pane-head select { font-size: .85rem; }
-.pane-body { height: 74vh; min-height: 420px; overflow: auto; }
+.pane-body { height: min(74vh, 860px); min-height: 420px; overflow: auto; }
 .pane-img .pane-body { background: var(--surface-2); padding: 10px; display: flex; justify-content: center; align-items: flex-start; }
 .pane-img img { width: 100%; height: auto; border-radius: 4px; border: 1px solid var(--border); background: #fff; display: block; }
 pre.out { margin: 0; padding: 12px 14px; font: 12.5px/1.6 var(--mono); white-space: pre-wrap; word-break: break-word; color: var(--text); }
@@ -231,7 +231,7 @@ pre.out mark { background: var(--mark); color: inherit; border-radius: 3px; padd
       summary_sub: "Answer survives: the answer string is still in the parser output. Recall@{k}: a relevant chunk is in the top {k}. MRR: mean reciprocal rank of the first relevant chunk (cut at {c}). Same chunker ({chars} characters) for every parser.",
       viewer_sub: "The rendered page next to what each parser extracted from it. Pick any two parsers; the page stays in sync.",
       questions_sub: "Rank of the first chunk that contains the answer, for the selected retrieval method.",
-      timing_sub: "Seconds per page exclude model loading, which is reported separately as warm-up (first document, untimed run).",
+      timing_sub: "Seconds per page exclude model loading: each parser first converts an untimed two-page warm-up PDF (one text page, one image-only page), reported as warm-up.",
       original: "Original page", parser: "Parser", survives: "Answer survives", recall: "Recall@{k}", mrr: "MRR",
       spp: "s / page", failures: "Failures", device: "Device", warmup: "Warm-up", pages: "Pages", total: "Total",
       question: "Question", lost: "lost", none: "No failures.", legend_mark: "answer strings found on this page",
@@ -251,7 +251,7 @@ pre.out mark { background: var(--mark); color: inherit; border-radius: 3px; padd
       summary_sub: "La respuesta sobrevive: el texto de la respuesta sigue en la salida del parser. Recall@{k}: un fragmento relevante está entre los {k} primeros. MRR: rango recíproco medio del primer fragmento relevante (corte en {c}). El mismo troceado ({chars} caracteres) para todos.",
       viewer_sub: "La página renderizada junto a lo que cada parser extrajo de ella. Elige dos parsers; la página va sincronizada.",
       questions_sub: "Posición del primer fragmento que contiene la respuesta, con el método de recuperación elegido.",
-      timing_sub: "Los segundos por página no incluyen la carga de modelos, que aparece aparte como calentamiento (primer documento, sin cronometrar).",
+      timing_sub: "Los segundos por página no incluyen la carga de modelos: cada parser convierte antes, sin cronometrar, un PDF de calentamiento de dos páginas (una con texto y otra solo imagen).",
       original: "Página original", parser: "Parser", survives: "Respuesta sobrevive", recall: "Recall@{k}", mrr: "MRR",
       spp: "s / página", failures: "Fallos", device: "Dispositivo", warmup: "Calentamiento", pages: "Páginas", total: "Total",
       question: "Pregunta", lost: "perdida", none: "Sin fallos.", legend_mark: "respuestas encontradas en esta página",
@@ -269,7 +269,8 @@ pre.out mark { background: var(--mark); color: inherit; border-radius: 3px; padd
     get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   };
-  var lang = store.get("pa-lang") || ((navigator.language || "en").toLowerCase().indexOf("es") === 0 ? "es" : "en");
+  var qlang = (location.search.match(/[?&]lang=(en|es)/) || [])[1];
+  var lang = qlang || store.get("pa-lang") || ((navigator.language || "en").toLowerCase().indexOf("es") === 0 ? "es" : "en");
   var EV = D.evaluation, K = EV.k;
   var method = EV.methods.indexOf("hybrid") >= 0 ? "hybrid" : "bm25";
   var parsers = D.parsers.map(function (p) { return p.name; });
@@ -282,7 +283,7 @@ pre.out mark { background: var(--mark); color: inherit; border-radius: 3px; padd
   }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   var HASQ = D.questions.length > 0;
-  function pct(x) { return HASQ ? (x * 100).toFixed(0) + "%" : "–"; }
+  function pct(x) { return HASQ ? Math.round(x * 100) + "%" : "–"; }
   function fmt(x, d) { return x == null ? "–" : Number(x).toFixed(d == null ? 2 : d); }
   function label(name) { var p = D.parsers.filter(function (q) { return q.name === name; })[0]; return p ? p.label : name; }
   function ver(name) { var p = D.parsers.filter(function (q) { return q.name === name; })[0]; return p ? p.version : ""; }

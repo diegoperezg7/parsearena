@@ -62,14 +62,34 @@ parsearena run docs/*.pdf --parsers docling,pypdf      # any subset
 
 ## Example output
 
-Recorded on {{DATE}} on {{HW}}, three public PDFs (8 pages), 24 hand-written questions,
+Recorded on 3 Nov 2026 on an Apple M4 with 16 GB of RAM (macOS 27.2), three public PDFs (8 pages), 24 hand-written questions,
 recall@5 with hybrid retrieval (BM25 + `BAAI/bge-small-en-v1.5`, fused with reciprocal rank):
 
-{{TABLE}}
+| Parser | Answer survives | Recall@5 BM25 | Recall@5 dense | Recall@5 hybrid | MRR hybrid | s / page |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Docling 2.146.0 | 88% | 67% | 67% | 63% | 0.53 | 11.8 |
+| Marker 2.1.0 | **96%** | **79%** | **67%** | **75%** | **0.61** | 21.0 |
+| MinerU 4.1.6 | **96%** | 63% | 58% | 58% | 0.49 | 7.6 |
+| Unstructured 0.27.36 | 92% | 67% | 54% | 54% | 0.52 | 6.2 |
+| pypdf 6.21.4 (baseline) | 75% | 58% | 46% | 54% | 0.40 | 0.02 |
 
 What the numbers say on these pages:
 
-{{FINDINGS}}
+- **The scanned page is where the baseline breaks.** pypdf has no text to read on the NACA page and
+  loses all 6 of its answers. The four parsers OCR it; Marker and MinerU keep all 6.
+- **Charts and fonts.** On the Census chart page pypdf returns glyph names instead of digits
+  (`/dollar.tab/eight.tab/zero.tab...`), so the chart values only survive through the table page.
+- **Tables survive, but not always in a retrievable shape.** MinerU keeps every number of Table A-1,
+  yet it merges several row labels into one HTML cell. With the same chunker, the label and its value
+  end up apart, and table questions rank 16th to 30th with hybrid retrieval, where the other parsers mostly place
+  them in the top 10.
+- **Page furniture.** Docling and Marker drop the first-page footer, so "NeurIPS 2023" is gone from
+  their output. Unstructured merges the DPO results table with the body text around it and loses its
+  0.36 cell.
+- **Speed.** pypdf parses a page in 0.02 s. The model-based parsers take 6 to 21 s per page on this
+  machine, plus 20 to 100 s to load their models.
+
+Eight pages and 24 questions are a smoke test, not a ranking: run it on your own documents.
 
 Open the [example viewer](https://diegoperezg7.github.io/parsearena/) to check each of these against
 the page image.
@@ -147,14 +167,22 @@ Be ready for this the first time:
 
 - **Downloads.** Each parser environment is 1.1 to 1.4 GB, and the first parse downloads its models
   from Hugging Face. On the machine below, the four parser environments plus models took about
-  {{DISK}} GB of disk.
+  9 (5.2 GB of environments and 3.5 GB of models) of disk.
 - **System tools.** Unstructured's `hi_res` strategy needs `poppler` and `tesseract`. Marker 2.x runs
   its OCR model through llama.cpp when there is no NVIDIA GPU: install it (`brew install llama.cpp`)
   or point `LLAMA_CPP_BINARY` at a `llama-server` binary. parsearena warns before running a parser
   whose tools are missing.
-- **Time.** Measured on {{HW}}, with the models already downloaded:
+- **Time.** Measured on an Apple M4 with 16 GB of RAM (macOS 27.2), with the models already downloaded:
 
-{{TIMING}}
+  | Parser | Device | Model loading (s) | Seconds per page | Slowest document |
+  | --- | --- | ---: | ---: | --- |
+  | Docling | MPS | 38 | 11.8 | scanned page, 77 s |
+  | Marker | MPS + llama.cpp (Metal) | 99 | 21.0 | scanned page, 107 s |
+  | MinerU | MPS | 20 | 7.6 | DPO paper (equations), 43 s for 4 pages |
+  | Unstructured | CPU (ONNX) | 22 | 6.2 | Census, 21 s for 3 pages |
+  | pypdf | CPU | 0.1 | 0.02 | |
+
+  The whole `run` over the 8 demo pages took about 10 minutes, one parser at a time.
 
 ## Parsers and their licenses
 

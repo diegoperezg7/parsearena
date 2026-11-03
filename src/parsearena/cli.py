@@ -79,6 +79,11 @@ def _analyze(
     return index
 
 
+def _pct(x: float) -> str:
+    # Round half up, like the viewer (Math.round), so terminal and HTML agree.
+    return f"{int(x * 100 + 0.5)}%"
+
+
 def _print_summary(recorded, ev, tm) -> None:
     labels = {p["name"]: p["label"] for p in recorded["parsers"]}
     k = ev["k"]
@@ -94,8 +99,8 @@ def _print_summary(recorded, ev, tm) -> None:
     for p, res in ev["parsers"].items():
         s, t = res["summary"], tm[p]
         spp = t["seconds_per_page"]
-        row = [labels.get(p, p), f"{s['survives']:.0%}" if has_q else "-"]
-        row += [f"{s[m]['recall']:.0%}" if has_q else "-" for m in ev["methods"]]
+        row = [labels.get(p, p), _pct(s["survives"]) if has_q else "-"]
+        row += [_pct(s[m]["recall"]) if has_q else "-" for m in ev["methods"]]
         row += [f"{s[ev['methods'][-1]]['mrr']:.2f}" if has_q else "-"]
         row += ["-" if spp is None else (f"{spp:.3f}" if spp < 0.1 else f"{spp:.1f}")]
         row += [str(len(t["failed"])) if t["failed"] else "0"]
@@ -202,9 +207,10 @@ def demo(
     base = Path(str(resources.files("parsearena") / "demo"))
     recorded = json.loads((base / "recorded.json").read_text(encoding="utf-8"))
     m = recorded["meta"]
+    created = m["created"].replace("T", " ").replace("Z", " UTC")
     versions = ", ".join(f"{p['label']} {p['version']}" for p in recorded["parsers"])
     console.print(
-        f"[bold]Recorded run[/] from {m['created']} (parsearena {m['tool_version']}, {m['hardware']}).\n"
+        f"[bold]Recorded run[/] from {created} (parsearena {m['tool_version']}, {m['hardware']}).\n"
         f"Parsers: {versions}.\nParser outputs are replayed; retrieval is computed now.\n"
     )
     docs = recorded["docs"]
