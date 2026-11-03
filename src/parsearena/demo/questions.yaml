@@ -1,0 +1,104 @@
+# Hand-written question set for the bundled demo PDFs.
+# Each answer is a short string copied from the original page.
+questions:
+  # U.S. Census Bureau, Income in the United States: 2023 (text page, chart page, table page)
+  - id: census-median
+    doc: census-income-2023.pdf
+    q: What was real median household income in the United States in 2023?
+    answers: ["80,610"]
+  - id: census-cpi
+    doc: census-income-2023.pdf
+    q: How much did consumer prices rise between 2022 and 2023 according to the C-CPI-U?
+    answers: ["4.0 percent increase"]
+  - id: census-earnings-ratio
+    doc: census-income-2023.pdf
+    q: What was the female-to-male earnings ratio for full-time, year-round workers in 2023?
+    answers: ["82.7 percent"]
+  - id: census-survey
+    doc: census-income-2023.pdf
+    q: Which survey supplement are the income estimates based on?
+    answers: ["Annual Social and Economic Supplements"]
+  - id: census-asian
+    doc: census-income-2023.pdf
+    q: What was the median income of Asian households in 2023?
+    answers: ["112,800"]
+  - id: census-bachelor
+    doc: census-income-2023.pdf
+    q: What was the median household income for householders with a bachelor's degree or higher in 2023?
+    answers: ["126,800"]
+  - id: census-midwest
+    doc: census-income-2023.pdf
+    q: What was the median household income in the Midwest in 2023?
+    answers: ["81,020"]
+  - id: census-nonmetro
+    doc: census-income-2023.pdf
+    q: What was the median income of households outside metropolitan statistical areas in 2023?
+    answers: ["62,520"]
+  - id: census-households
+    doc: census-income-2023.pdf
+    q: How many households (in thousands) were there in 2023?
+    answers: ["132,200"]
+  - id: census-foreign
+    doc: census-income-2023.pdf
+    q: What was the 2023 median income of households with a foreign-born householder?
+    answers: ["73,360"]
+
+  # Rafailov et al., Direct Preference Optimization (arXiv:2305.18290, CC BY 4.0)
+  - id: dpo-name
+    doc: dpo-arxiv-2305.18290.pdf
+    q: What does the acronym DPO stand for?
+    answers: ["Direct Preference Optimization"]
+  - id: dpo-preference-model
+    doc: dpo-arxiv-2305.18290.pdf
+    q: Under which preference model does the partition function cancel out in the DPO derivation?
+    answers: ["Bradley-Terry"]
+  - id: dpo-z
+    doc: dpo-arxiv-2305.18290.pdf
+    q: What is Z(x) called in the closed-form optimal policy?
+    answers: ["partition function"]
+  - id: dpo-gradient-weight
+    doc: dpo-arxiv-2305.18290.pdf
+    q: In the gradient of the DPO loss, when does an example get a higher weight?
+    answers: ["when reward estimate is wrong"]
+  - id: dpo-tldr
+    doc: dpo-arxiv-2305.18290.pdf
+    q: What win rate does DPO reach on TL;DR summarization at temperature 0.0?
+    answers: ["61%"]
+  - id: dpo-cnn
+    doc: dpo-arxiv-2305.18290.pdf
+    q: What GPT-4 win rate against ground truth does DPO get on CNN/DailyMail at temperature 0?
+    answers: ["0.36"]
+  - id: dpo-dialogue-model
+    doc: dpo-arxiv-2305.18290.pdf
+    q: Which pre-trained model is the starting point for the single-turn dialogue experiments?
+    answers: ["Pythia-2.8B"]
+  - id: dpo-venue
+    doc: dpo-arxiv-2305.18290.pdf
+    q: At which conference was the DPO paper published?
+    answers: ["NeurIPS 2023"]
+
+  # NACA Report 1135 (1953), a scanned page with no text layer (public domain)
+  - id: naca-report
+    doc: naca-report-1135-scan.pdf
+    q: What is the report number of "Equations, Tables, and Charts for Compressible Flow"?
+    answers: ["Report 1135"]
+  - id: naca-tn
+    doc: naca-report-1135-scan.pdf
+    q: Which NACA technical note does the compressible flow report revise and extend?
+    answers: ["1428"]
+  - id: naca-authors
+    doc: naca-report-1135-scan.pdf
+    q: Who is credited as the author of the compressible flow report?
+    answers: ["Ames Research Staff"]
+  - id: naca-gamma
+    doc: naca-report-1135-scan.pdf
+    q: What quantity does the symbol gamma stand for in the compressible flow notation?
+    answers: ["ratio of specific heats"]
+  - id: naca-extensions
+    doc: naca-report-1135-scan.pdf
+    q: In which direction were the compressible flow tables extended, according to the introduction?
+    answers: ["higher Mach numbers"]
+  - id: naca-vm
+    doc: naca-report-1135-scan.pdf
+    q: What does V_m denote in the list of symbols?
+    answers: ["maximum speed obtainable"]

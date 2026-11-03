@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.env
+parsearena-out/
+parsearena-demo/
+runs/
+_site/
+.DS_Store
