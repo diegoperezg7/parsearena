@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .retrieval import BM25, Embedder, ranking, rrf
+from .retrieval import BM25, Embedder, rrf, score_ranks
 from .text import chunk_text, contains, normalize
 
 MRR_CUTOFF = 10
@@ -36,11 +36,9 @@ class DocOutput:
         return self.error is None
 
 
-def _first_hit(order: list[int], relevant: set[int]) -> int | None:
-    for pos, idx in enumerate(order, start=1):
-        if idx in relevant:
-            return pos
-    return None
+def _first_hit(ranks: dict[int, int], relevant: set[int]) -> int | None:
+    hits = [ranks[i] for i in relevant if i in ranks]
+    return min(hits) if hits else None
 
 
 def evaluate(
@@ -82,10 +80,11 @@ def evaluate(
             }
             ranks: dict[str, int | None] = {}
             if texts:
-                orders = {"bm25": ranking(bm25.scores(q.q))}
+                orders = {"bm25": score_ranks(bm25.scores(q.q), drop_zero=True)}
                 if c_vecs is not None and q_vecs is not None:
-                    orders["dense"] = ranking((c_vecs @ q_vecs[qi]).tolist())
-                    orders["hybrid"] = rrf([orders["bm25"], orders["dense"]])
+                    orders["dense"] = score_ranks((c_vecs @ q_vecs[qi]).tolist())
+                    fused = rrf([orders["bm25"], orders["dense"]])
+                    orders["hybrid"] = score_ranks([fused.get(i, 0.0) for i in range(len(texts))])
                 for m in methods:
                     ranks[m] = _first_hit(orders[m], relevant)
             else:

@@ -54,6 +54,7 @@ class FastEmbedder:
     """Local ONNX embeddings through fastembed. No torch, no network after the first download."""
 
     def __init__(self, model: str = DEFAULT_EMBED_MODEL, cache_dir: str | None = None) -> None:
+        quiet_hf_hub()
         from fastembed import TextEmbedding
 
         self.name = model
@@ -68,21 +69,70 @@ class FastEmbedder:
         return _unit(np.array(list(self._model.query_embed(list(texts))), dtype=np.float32))
 
 
+def quiet_hf_hub() -> None:
+    """Silence Hugging Face Hub progress bars and warnings; the CLI prints its own line."""
+    import logging
+    import os
+    import warnings
+
+    os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
+    os.environ.setdefault("HF_HUB_VERBOSITY", "error")
+    os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
+    os.environ.setdefault("TQDM_DISABLE", "1")
+    logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
+    warnings.filterwarnings("ignore", module="huggingface_hub")
+    try:
+        from huggingface_hub.utils import disable_progress_bars
+        from huggingface_hub.utils import logging as hf_logging
+
+        disable_progress_bars()
+        hf_logging.set_verbosity_error()
+    except Exception:  # noqa: BLE001 - only cosmetic
+        pass
+    try:
+        from loguru import logger
+
+        logger.disable("fastembed")
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def model_is_cached(model: str, cache_dir: str) -> bool:
+    from pathlib import Path
+
+    key = model.split("/")[-1].lower()
+    root = Path(cache_dir)
+    return root.exists() and any(key in p.name.lower() for p in root.iterdir() if p.is_dir())
+
+
 def _unit(m: np.ndarray) -> np.ndarray:
     norms = np.linalg.norm(m, axis=1, keepdims=True)
     norms[norms == 0] = 1.0
     return m / norms
 
 
-def ranking(scores: Sequence[float]) -> list[int]:
-    """Indices sorted by score, best first; ties keep corpus order."""
-    return sorted(range(len(scores)), key=lambda i: (-scores[i], i))
+def score_ranks(scores: Sequence[float], drop_zero: bool = False) -> dict[int, int]:
+    """Rank of each item, best = 1. Tied scores share a rank (1, 2, 2, 4).
+
+    With ``drop_zero`` items scoring 0 are left out: for BM25 a zero score means
+    the chunk shares no term with the query, so it was not retrieved at all and
+    must not get a position (or a share of a fusion) from its place in the corpus.
+    """
+    items = [(i, s) for i, s in enumerate(scores) if not (drop_zero and s <= 0)]
+    items.sort(key=lambda t: -t[1])
+    ranks: dict[int, int] = {}
+    prev, rank = None, 0
+    for pos, (i, s) in enumerate(items, start=1):
+        if s != prev:
+            rank, prev = pos, s
+        ranks[i] = rank
+    return ranks
 
 
-def rrf(rankings: Sequence[Sequence[int]], k: int = 60) -> list[int]:
-    """Reciprocal rank fusion of several rankings over the same items."""
+def rrf(rank_maps: Sequence[dict[int, int]], k: int = 60) -> dict[int, float]:
+    """Reciprocal rank fusion: sum of 1 / (k + rank) over the lists an item appears in."""
     fused: dict[int, float] = {}
-    for r in rankings:
-        for pos, idx in enumerate(r):
-            fused[idx] = fused.get(idx, 0.0) + 1.0 / (k + pos + 1)
-    return sorted(fused, key=lambda i: (-fused[i], i))
+    for ranks in rank_maps:
+        for idx, rank in ranks.items():
+            fused[idx] = fused.get(idx, 0.0) + 1.0 / (k + rank)
+    return fused

@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.1] - 2026-11-03
+
+### Fixed
+- Hybrid retrieval: BM25 chunks with a score of 0 no longer take part in the fusion with a position
+  taken from their place in the corpus, and tied scores now share a rank. Recall@5 of the demo is
+  unchanged; some MRR values move by 0.02 to 0.03.
+- `--gen-questions`: a timeout is reported as a timeout, not as an unreachable server
+  (`PARSEARENA_LLM_TIMEOUT` sets the limit).
+
+### Changed
+- The first download of the embedding model prints one line instead of Hugging Face progress bars
+  and warnings.
+- README and viewer explain why hybrid can score below BM25 and dense, and give the real first-run
+  time of the quickstart.
+
 ## [0.1.0] - 2026-11-03
 
 First release.

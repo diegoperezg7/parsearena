@@ -41,7 +41,7 @@ La demo reproduce salidas grabadas de una ejecución real y calcula la recuperac
 claves, sin GPU, sin Docker y sin descargar parsers.
 
 ```bash
-uvx --from git+https://github.com/diegoperezg7/parsearena@v0.1.0 parsearena demo
+uvx --from git+https://github.com/diegoperezg7/parsearena@v0.1.1 parsearena demo
 ```
 
 o desde un clon:
@@ -50,7 +50,8 @@ o desde un clon:
 git clone https://github.com/diegoperezg7/parsearena && cd parsearena && uv run parsearena demo
 ```
 
-Escribe `parsearena-demo/index.html` y lo abre. `uvx parsearena` llegará con la publicación en PyPI.
+Escribe `parsearena-demo/index.html` y lo abre. La primera vez tarda unos 75 s (dependencias y un
+modelo de embeddings de 65 MB); después, unos segundos. `uvx parsearena` llegará con la publicación en PyPI.
 
 Después, con tus PDF:
 
@@ -67,9 +68,9 @@ recall@5 con recuperación híbrida (BM25 + `BAAI/bge-small-en-v1.5`, fusionados
 
 | Parser | Respuesta sobrevive | Recall@5 BM25 | Recall@5 densa | Recall@5 híbrida | MRR híbrida | s / página |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Docling 2.146.0 | 88% | 67% | 67% | 63% | 0,53 | 11,8 |
-| Marker 2.1.0 | **96%** | **79%** | **67%** | **75%** | **0,61** | 21,0 |
-| MinerU 4.1.6 | **96%** | 63% | 58% | 58% | 0,49 | 7,6 |
+| Docling 2.146.0 | 88% | 67% | 67% | 63% | 0,55 | 11,8 |
+| Marker 2.1.0 | **96%** | **79%** | **67%** | **75%** | **0,63** | 21,0 |
+| MinerU 4.1.6 | **96%** | 63% | 58% | 58% | 0,52 | 7,6 |
 | Unstructured 0.27.36 | 92% | 67% | 54% | 54% | 0,52 | 6,2 |
 | pypdf 6,21.4 (línea base) | 75% | 58% | 46% | 54% | 0,40 | 0,02 |
 
@@ -82,8 +83,10 @@ Lo que dicen las cifras en estas páginas:
   de dígitos (`/dollar.tab/eight.tab/zero.tab...`), así que esos valores solo sobreviven por la tabla.
 - **Las tablas sobreviven, pero no siempre de forma recuperable.** MinerU conserva todos los números de
   la tabla A-1, pero junta varias etiquetas de fila en una sola celda HTML. Con el mismo troceado, la
-  etiqueta y su valor quedan separados, y las preguntas de la tabla caen al puesto 16 a 30 con
-  recuperación híbrida, cuando los demás las dejan casi siempre entre los 10 primeros.
+  etiqueta y su valor quedan separados: el fragmento con los números no comparte ninguna palabra con
+  la pregunta, así que BM25 no lo recupera, la búsqueda densa lo pone entre el puesto 7 y el 16, y la
+  fusión lo deja entre el 31 y el 37. Los demás parsers dejan esas preguntas casi siempre entre los 10
+  primeros.
 - **Pies de página.** Docling y Marker quitan el pie de la primera página, así que "NeurIPS 2023"
   desaparece de su salida. Unstructured mezcla la tabla de resultados de DPO con el texto de alrededor
   y pierde la celda 0.36.
@@ -127,6 +130,10 @@ flowchart LR
    con embeddings locales ([fastembed](https://github.com/qdrant/fastembed), ONNX, sin torch) y con su
    fusión por rango recíproco. Un fragmento es relevante si es del documento de la pregunta y contiene
    la respuesta.
+   La híbrida puede quedar por debajo de sus dos partes: la fusión premia los fragmentos que ambos
+   métodos ponen arriba, así que uno que solo encuentra un método (por ejemplo, una celda de tabla sin
+   ninguna palabra de la pregunta) baja en la lista fusionada. Los fragmentos con BM25 igual a 0 cuentan
+   como no recuperados, y las puntuaciones empatadas comparten posición.
 5. **Métricas.** *Respuesta sobrevive*: el texto de la respuesta sigue en la salida tras normalizar
    (mayúsculas, espacios, marcado markdown y HTML). *Recall@k*: hay un fragmento relevante entre los k
    primeros. *MRR*: rango recíproco del primer fragmento relevante, con corte en 10.

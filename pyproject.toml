@@ -1,6 +1,6 @@
 [project]
 name = "parsearena"
-version = "0.1.0"
+version = "0.1.1"
 description = "Run your PDFs through Docling, Marker, MinerU and Unstructured. Compare the output side by side and see what each one does to retrieval."
 readme = "README.md"
 license = "MIT"

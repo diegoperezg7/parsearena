@@ -49,10 +49,17 @@ def _embedder(no_dense: bool, model: str):
     if no_dense:
         return None
     try:
-        from .retrieval import FastEmbedder
+        from .retrieval import FastEmbedder, model_is_cached
 
-        with console.status(f"Loading embedding model {model} (first time downloads it)..."):
-            return FastEmbedder(model, cache_dir=str(home() / "models"))
+        cache = str(home() / "models")
+        if model_is_cached(model, cache):
+            msg = f"Loading embedding model {model}..."
+        else:
+            size = ", about 65 MB" if model == DEFAULT_EMBED_MODEL else ""
+            msg = f"Downloading embedding model {model} (one time{size})..."
+            console.print(msg)
+        with console.status(msg):
+            return FastEmbedder(model, cache_dir=cache)
     except Exception as exc:  # network errors, unknown model names
         raise UserError(
             f"Could not load the embedding model {model}: {type(exc).__name__}: {exc}"[:400],

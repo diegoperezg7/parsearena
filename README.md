@@ -41,7 +41,7 @@ The demo replays outputs recorded from a real run and computes retrieval live. N
 no Docker, no parser downloads.
 
 ```bash
-uvx --from git+https://github.com/diegoperezg7/parsearena@v0.1.0 parsearena demo
+uvx --from git+https://github.com/diegoperezg7/parsearena@v0.1.1 parsearena demo
 ```
 
 or from a clone:
@@ -50,7 +50,8 @@ or from a clone:
 git clone https://github.com/diegoperezg7/parsearena && cd parsearena && uv run parsearena demo
 ```
 
-It writes `parsearena-demo/index.html` and opens it. `uvx parsearena` is coming to PyPI.
+It writes `parsearena-demo/index.html` and opens it. The first run takes about 75 s (dependencies and a
+65 MB embedding model); later runs take a few seconds. `uvx parsearena` is coming to PyPI.
 
 Then run it on your own PDFs:
 
@@ -67,9 +68,9 @@ recall@5 with hybrid retrieval (BM25 + `BAAI/bge-small-en-v1.5`, fused with reci
 
 | Parser | Answer survives | Recall@5 BM25 | Recall@5 dense | Recall@5 hybrid | MRR hybrid | s / page |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Docling 2.146.0 | 88% | 67% | 67% | 63% | 0.53 | 11.8 |
-| Marker 2.1.0 | **96%** | **79%** | **67%** | **75%** | **0.61** | 21.0 |
-| MinerU 4.1.6 | **96%** | 63% | 58% | 58% | 0.49 | 7.6 |
+| Docling 2.146.0 | 88% | 67% | 67% | 63% | 0.55 | 11.8 |
+| Marker 2.1.0 | **96%** | **79%** | **67%** | **75%** | **0.63** | 21.0 |
+| MinerU 4.1.6 | **96%** | 63% | 58% | 58% | 0.52 | 7.6 |
 | Unstructured 0.27.36 | 92% | 67% | 54% | 54% | 0.52 | 6.2 |
 | pypdf 6.21.4 (baseline) | 75% | 58% | 46% | 54% | 0.40 | 0.02 |
 
@@ -81,8 +82,9 @@ What the numbers say on these pages:
   (`/dollar.tab/eight.tab/zero.tab...`), so the chart values only survive through the table page.
 - **Tables survive, but not always in a retrievable shape.** MinerU keeps every number of Table A-1,
   yet it merges several row labels into one HTML cell. With the same chunker, the label and its value
-  end up apart, and table questions rank 16th to 30th with hybrid retrieval, where the other parsers mostly place
-  them in the top 10.
+  end up apart: the chunk with the numbers shares no word with the question, so BM25 never retrieves
+  it, dense retrieval ranks it 7th to 16th, and the fused list puts it 31st to 37th. The other parsers
+  mostly keep those questions in the top 10.
 - **Page furniture.** Docling and Marker drop the first-page footer, so "NeurIPS 2023" is gone from
   their output. Unstructured merges the DPO results table with the body text around it and loses its
   0.36 cell.
@@ -124,6 +126,9 @@ flowchart LR
    embeddings ([fastembed](https://github.com/qdrant/fastembed), ONNX, no torch) and with their
    reciprocal-rank fusion. A chunk is relevant if it belongs to the question's document and contains
    the answer string.
+   Hybrid can score below both of its parts: fusion rewards chunks that both methods rank well, so a
+   chunk that only one of them finds (a table cell with none of the query words, say) drops in the
+   fused list. BM25 chunks with a score of 0 are treated as not retrieved, and tied scores share a rank.
 5. **Metrics.** *Answer survives*: the answer string is still in the parser output after
    normalization (case, whitespace, markdown and HTML markup). *Recall@k*: a relevant chunk is in the
    top k. *MRR*: reciprocal rank of the first relevant chunk, cut at 10.
