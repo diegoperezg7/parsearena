@@ -41,7 +41,7 @@ The demo replays outputs recorded from a real run and computes retrieval live. N
 no Docker, no parser downloads.
 
 ```bash
-uvx --from git+https://github.com/diegoperezg7/parsearena@v0.1.2 parsearena demo
+uvx --from git+https://github.com/diegoperezg7/parsearena@v0.1.3 parsearena demo
 ```
 
 or from a clone:

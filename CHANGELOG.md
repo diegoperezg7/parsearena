@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.3] - 2026-11-03
 
 ### Fixed
 - Parser helper processes no longer outlive a run. Marker 2.x starts Surya inference servers

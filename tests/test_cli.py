@@ -73,7 +73,7 @@ def test_missing_api_key_message(tmp_path):
 
 def test_version_and_help():
     proc = cli("--version")
-    assert proc.returncode == 0 and "parsearena 0.1.2" in proc.stdout
+    assert proc.returncode == 0 and "parsearena 0.1.3" in proc.stdout
     assert app.info.help.startswith("Run your PDFs")
     proc = cli("parsers")
     assert proc.returncode == 0 and "docling==2.146.0" in proc.stdout

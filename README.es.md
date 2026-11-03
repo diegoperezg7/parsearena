@@ -41,7 +41,7 @@ La demo reproduce salidas grabadas de una ejecución real y calcula la recuperac
 claves, sin GPU, sin Docker y sin descargar parsers.
 
 ```bash
-uvx --from git+https://github.com/diegoperezg7/parsearena@v0.1.2 parsearena demo
+uvx --from git+https://github.com/diegoperezg7/parsearena@v0.1.3 parsearena demo
 ```
 
 o desde un clon:
