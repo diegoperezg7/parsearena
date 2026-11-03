@@ -6,6 +6,7 @@ import json
 import os
 import platform
 import re
+import signal
 import subprocess
 import time
 from dataclasses import asdict
@@ -138,19 +139,22 @@ def run_parser(
     started = time.perf_counter()
     error = None
     with open(log_path, "w") as lf:
+        proc = subprocess.Popen(
+            [str(python), str(runner_dir() / spec.runner), str(mpath)],
+            stdout=lf,
+            stderr=subprocess.STDOUT,
+            env=env,
+            cwd=pdir,
+            start_new_session=True,
+        )
         try:
-            proc = subprocess.run(
-                [str(python), str(runner_dir() / spec.runner), str(mpath)],
-                stdout=lf,
-                stderr=subprocess.STDOUT,
-                env=env,
-                timeout=timeout,
-                cwd=pdir,
-            )
-            if proc.returncode != 0:
-                error = f"runner exited with code {proc.returncode}"
+            code = proc.wait(timeout=timeout)
+            if code != 0:
+                error = f"runner exited with code {code}"
         except subprocess.TimeoutExpired:
             error = f"timed out after {timeout}s"
+        finally:
+            stop_process_tree(proc)
     wall = time.perf_counter() - started
     results: dict[str, DocOutput] = {}
     for d in manifest["docs"]:
@@ -171,6 +175,66 @@ def run_parser(
                 pages=[], error=f"{error or 'no output'}: {tail}"[:1500], extra={"wall_seconds": wall}
             )
     return results
+
+
+def _descendants(pid: int) -> list[int]:
+    try:
+        out = subprocess.run(
+            ["ps", "-A", "-o", "pid=,ppid="], capture_output=True, text=True, timeout=10
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return []
+    children: dict[int, list[int]] = {}
+    for line in out.splitlines():
+        parts = line.split()
+        if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
+            children.setdefault(int(parts[1]), []).append(int(parts[0]))
+    found, stack = [], [pid]
+    while stack:
+        for child in children.get(stack.pop(), []):
+            found.append(child)
+            stack.append(child)
+    return found
+
+
+def stop_process_tree(proc: subprocess.Popen, grace: float = 5.0) -> None:
+    """Make sure neither the runner nor anything it started outlives it.
+
+    The runner kills its own helpers on a normal exit; this covers timeouts and
+    crashes: every descendant (even one in its own session) and the runner's
+    process group get SIGTERM, then SIGKILL.
+    """
+    running = proc.poll() is None
+    # Only signal PIDs we know are ours: after a normal exit the runner is reaped and
+    # its PID may be reused, so only its process group is signalled.
+    targets = [*_descendants(proc.pid), proc.pid] if running else []
+    for sig in (signal.SIGTERM, signal.SIGKILL):
+        for p in targets:
+            try:
+                os.kill(p, sig)
+            except (ProcessLookupError, PermissionError):
+                pass
+        try:
+            os.killpg(proc.pid, sig)
+        except (ProcessLookupError, PermissionError):
+            pass
+        try:
+            proc.wait(timeout=grace)
+        except subprocess.TimeoutExpired:
+            continue
+        if sig == signal.SIGTERM:
+            time.sleep(0.2)
+            targets = [p for p in targets if _pid_alive(p)]
+            if not targets:
+                break
+
+
+def _pid_alive(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+        return True
+    except (ProcessLookupError, PermissionError):
+        return False
 
 
 def _tail(path: Path, lines: int = 6) -> str:

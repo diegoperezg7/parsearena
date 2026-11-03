@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+- Parser helper processes no longer outlive a run. Marker 2.x starts Surya inference servers
+  (layout, OCR error, llama.cpp) in their own sessions, and they kept running after `parsearena run`
+  finished. Runners now call Marker's `shutdown_models()` and stop every descendant process on exit,
+  and `run` stops the runner's whole process tree on timeouts and crashes.
+
 ## [0.1.2] - 2026-11-03
 
 ### Added

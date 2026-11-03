@@ -43,4 +43,12 @@ def convert(converter, path, num_pages):
 
 
 if __name__ == "__main__":
-    run(setup, convert, version("marker-pdf"))
+
+    def teardown():
+        # Marker 2.x starts Surya inference servers (layout, OCR error, llama.cpp);
+        # stop them before the runner exits.
+        from marker.models import shutdown_models
+
+        shutdown_models()
+
+    run(setup, convert, version("marker-pdf"), teardown=teardown)

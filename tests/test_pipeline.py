@@ -121,3 +121,36 @@ def test_relative_work_dir(tmp_path, fake_runner, monkeypatch):
     docs = pipeline.collect_docs([make_pdf(tmp_path / "good.pdf", 1)])
     res = pipeline.run_parser(fake_runner, docs, Path("rel/work"))
     assert res["good"].ok, res["good"].error
+
+
+def _alive(pid: int) -> bool:
+    import os
+
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    out = __import__("subprocess").run(["ps", "-o", "stat=", "-p", str(pid)], capture_output=True, text=True)
+    return bool(out.stdout.strip()) and not out.stdout.strip().startswith("Z")
+
+
+def _wait_dead(pid: int, seconds: float = 5.0) -> bool:
+    import time
+
+    end = time.time() + seconds
+    while time.time() < end:
+        if not _alive(pid):
+            return True
+        time.sleep(0.1)
+    return False
+
+
+@pytest.mark.parametrize("mode, timeout", [("spawn", 60), ("spawn-hang", 3)])
+def test_helper_processes_do_not_outlive_the_runner(tmp_path, fake_runner, monkeypatch, mode, timeout):
+    pidfile = tmp_path / "helper.pid"
+    monkeypatch.setenv("FAKE_MODE", mode)
+    monkeypatch.setenv("FAKE_PIDFILE", str(pidfile))
+    docs = pipeline.collect_docs([make_pdf(tmp_path / "good.pdf", 1)])
+    pipeline.run_parser(fake_runner, docs, tmp_path / "work", timeout=timeout, warmup=False)
+    pid = int(pidfile.read_text())
+    assert _wait_dead(pid), f"helper {pid} survived the runner ({mode})"
