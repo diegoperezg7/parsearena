@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- The default Mistral model for `--gen-questions` is now `ministral-8b-latest` (was `mistral-small-latest`).
+- README notes the live `--gen-questions` tests with `ministral-8b-latest`.
+
 ## [0.1.1] - 2026-11-03
 
 ### Fixed

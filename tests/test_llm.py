@@ -64,10 +64,10 @@ def test_budget_checked_before_the_call(monkeypatch):
 def test_spend_uses_token_prices_and_reported_cost(monkeypatch):
     llm = _paid(monkeypatch, lambda **k: _Resp())
     assert llm.complete("s", "p") == "ok"
-    assert llm.spent == pytest.approx((1000 * 0.10 + 100 * 0.30) / 1e6)
+    assert llm.spent == pytest.approx((1000 * 0.10 + 100 * 0.10) / 1e6)
     llm._client = _Client(lambda **k: _Resp(cost=0.5))
     llm.complete("s", "p")
-    assert llm.spent == pytest.approx(0.5 + (1000 * 0.10 + 100 * 0.30) / 1e6)
+    assert llm.spent == pytest.approx(0.5 + (1000 * 0.10 + 100 * 0.10) / 1e6)
 
 
 def _req():

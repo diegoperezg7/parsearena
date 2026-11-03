@@ -24,7 +24,7 @@ PRESETS: dict[str, Preset] = {
         "https://openrouter.ai/api/v1", "OPENROUTER_API_KEY", "deepseek/deepseek-v4.1-flash", 0.045, 0.50
     ),
     "openai": Preset("https://api.openai.com/v1", "OPENAI_API_KEY", "gpt-5.6-luna", 0.20, 1.20),
-    "mistral": Preset("https://api.mistral.ai/v1", "MISTRAL_API_KEY", "mistral-small-latest", 0.10, 0.30),
+    "mistral": Preset("https://api.mistral.ai/v1", "MISTRAL_API_KEY", "ministral-8b-latest", 0.10, 0.10),
 }
 
 

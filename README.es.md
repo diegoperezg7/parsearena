@@ -162,8 +162,8 @@ está instalado.
 `--gen-questions` se probó en vivo el 3 nov 2026 con `--provider mistral --model ministral-8b-latest`
 sobre dos PDF de la demo: 9 preguntas guardadas de 10 pedidas, todas con sentido y con la respuesta
 literal en el texto, por unos 0,001 USD. Revisa el fichero antes de fiarte: una respuesta era solo `β`,
-demasiado corta para ser un buen objetivo de recuperación. Si `mistral-small-latest` te devuelve 429,
-prueba `--model ministral-8b-latest`.
+demasiado corta para ser un buen objetivo de recuperación. `--gen-questions` también se probó en vivo con mistral/ministral-8b-latest sobre census-income-2023.pdf:
+4 preguntas, todas con la respuesta en el texto, 0,0006 USD. `ministral-8b-latest` es el modelo de Mistral por defecto.
 
 Fichero de preguntas:
 
