@@ -51,7 +51,7 @@ git clone https://github.com/diegoperezg7/parsearena && cd parsearena && uv run 
 ```
 
 Escribe `parsearena-demo/index.html` y lo abre. La primera vez tarda unos 75 s (dependencias y un
-modelo de embeddings de 65 MB); después, unos segundos. `uvx parsearena` llegará con la publicación en PyPI.
+modelo de embeddings de 65 MB); después, unos 2 s, porque los embeddings ya calculados se guardan en caché. `uvx parsearena` llegará con la publicación en PyPI.
 
 Después, con tus PDF:
 
@@ -128,7 +128,7 @@ flowchart LR
    diferencias vienen del parser.
 4. **Recuperación.** Para cada pregunta se ordenan los fragmentos de *todos* los documentos con BM25,
    con embeddings locales ([fastembed](https://github.com/qdrant/fastembed), ONNX, sin torch) y con su
-   fusión por rango recíproco. Un fragmento es relevante si es del documento de la pregunta y contiene
+   fusión por rango recíproco. Los embeddings se guardan en caché por modelo y texto en `~/.cache/parsearena/models`. Un fragmento es relevante si es del documento de la pregunta y contiene
    la respuesta.
    La híbrida puede quedar por debajo de sus dos partes: la fusión premia los fragmentos que ambos
    métodos ponen arriba, así que uno que solo encuentra un método (por ejemplo, una celda de tabla sin

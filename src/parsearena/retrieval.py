@@ -59,14 +59,73 @@ class FastEmbedder:
 
         self.name = model
         self._model = TextEmbedding(model_name=model, cache_dir=cache_dir)
+        self._store = VectorCache(cache_dir, model) if cache_dir else None
+
+    def _cached(self, kind: str, texts: Sequence[str], fn) -> np.ndarray:
+        if self._store is None:
+            return _unit(np.array(list(fn(list(texts))), dtype=np.float32))
+        keys = [self._store.key(kind, t) for t in texts]
+        missing = [t for k, t in zip(keys, texts, strict=True) if k not in self._store]
+        if missing:
+            vecs = _unit(np.array(list(fn(list(dict.fromkeys(missing)))), dtype=np.float32))
+            for t, v in zip(dict.fromkeys(missing), vecs, strict=True):
+                self._store.put(self._store.key(kind, t), v)
+            self._store.save()
+        return np.stack([self._store.get(k) for k in keys])
 
     def embed(self, texts: Sequence[str]) -> np.ndarray:
         if not texts:
             return np.zeros((0, 1), dtype=np.float32)
-        return _unit(np.array(list(self._model.passage_embed(list(texts))), dtype=np.float32))
+        return self._cached("p", texts, self._model.passage_embed)
 
     def embed_queries(self, texts: Sequence[str]) -> np.ndarray:
-        return _unit(np.array(list(self._model.query_embed(list(texts))), dtype=np.float32))
+        return self._cached("q", texts, self._model.query_embed)
+
+
+class VectorCache:
+    """Embeddings already computed, keyed by model and text hash, in one .npz per model.
+
+    The first run computes every vector; later runs over the same text reuse them.
+    """
+
+    def __init__(self, cache_dir: str, model: str) -> None:
+        from pathlib import Path
+
+        slug = "".join(c if c.isalnum() else "-" for c in model)
+        self.path = Path(cache_dir) / "vectors" / f"{slug}.npz"
+        self._data: dict[str, np.ndarray] = {}
+        self._dirty = False
+        if self.path.exists():
+            try:
+                with np.load(self.path) as f:
+                    self._data = {k: f[k] for k in f.files}
+            except (OSError, ValueError):
+                self._data = {}
+
+    @staticmethod
+    def key(kind: str, text: str) -> str:
+        import hashlib
+
+        return kind + hashlib.sha256(text.encode("utf-8")).hexdigest()[:32]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self._data
+
+    def get(self, key: str) -> np.ndarray:
+        return self._data[key]
+
+    def put(self, key: str, vec: np.ndarray) -> None:
+        self._data[key] = vec
+        self._dirty = True
+
+    def save(self) -> None:
+        if not self._dirty:
+            return
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = self.path.with_suffix(".tmp.npz")
+        np.savez(tmp, **self._data)
+        tmp.replace(self.path)
+        self._dirty = False
 
 
 def quiet_hf_hub() -> None:

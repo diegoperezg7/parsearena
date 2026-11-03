@@ -1,4 +1,6 @@
-from parsearena.retrieval import BM25, rrf, score_ranks
+import numpy as np
+
+from parsearena.retrieval import BM25, FastEmbedder, VectorCache, rrf, score_ranks
 
 
 def test_bm25_prefers_matching_document():
@@ -34,3 +36,30 @@ def test_rrf_does_not_favour_corpus_order_for_unmatched_chunks():
     fused = rrf([bm25, dense])
     ranks = score_ranks([fused.get(i, 0.0) for i in range(3)])
     assert ranks[2] < ranks[0]
+
+
+def test_vector_cache_roundtrip(tmp_path):
+    c = VectorCache(str(tmp_path), "org/model")
+    k = c.key("p", "hello")
+    assert k not in c
+    c.put(k, np.ones(3, dtype=np.float32))
+    c.save()
+    again = VectorCache(str(tmp_path), "org/model")
+    assert k in again and again.get(k).tolist() == [1.0, 1.0, 1.0]
+    assert VectorCache.key("q", "hello") != k
+
+
+def test_embedder_reuses_cached_vectors(tmp_path):
+    calls = []
+
+    def fake(texts):
+        calls.append(list(texts))
+        return [np.arange(3, dtype=np.float32) + len(t) for t in texts]
+
+    e = FastEmbedder.__new__(FastEmbedder)
+    e._store = VectorCache(str(tmp_path), "m")
+    first = e._cached("p", ["a", "bb", "a"], fake)
+    assert calls == [["a", "bb"]]
+    second = e._cached("p", ["bb", "a"], fake)
+    assert calls == [["a", "bb"]]
+    assert np.allclose(second[0], first[1]) and np.allclose(second[1], first[0])

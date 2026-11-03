@@ -51,7 +51,7 @@ git clone https://github.com/diegoperezg7/parsearena && cd parsearena && uv run 
 ```
 
 It writes `parsearena-demo/index.html` and opens it. The first run takes about 75 s (dependencies and a
-65 MB embedding model); later runs take a few seconds. `uvx parsearena` is coming to PyPI.
+65 MB embedding model); later runs take about 2 s because computed embeddings are cached. `uvx parsearena` is coming to PyPI.
 
 Then run it on your own PDFs:
 
@@ -124,7 +124,7 @@ flowchart LR
    padding spaces and markdown table rules removed), so differences come from the parser.
 4. **Retrieval.** For each question, chunks from *all* documents are ranked with BM25, with local
    embeddings ([fastembed](https://github.com/qdrant/fastembed), ONNX, no torch) and with their
-   reciprocal-rank fusion. A chunk is relevant if it belongs to the question's document and contains
+   reciprocal-rank fusion. Embeddings are cached by model and text under `~/.cache/parsearena/models`. A chunk is relevant if it belongs to the question's document and contains
    the answer string.
    Hybrid can score below both of its parts: fusion rewards chunks that both methods rank well, so a
    chunk that only one of them finds (a table cell with none of the query words, say) drops in the

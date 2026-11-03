@@ -10,6 +10,8 @@
   (`PARSEARENA_LLM_TIMEOUT` sets the limit).
 
 ### Changed
+- Embeddings are cached on disk by model and text hash: a second `parsearena demo` takes about 2 s
+  instead of about 40 s on a busy machine.
 - The first download of the embedding model prints one line instead of Hugging Face progress bars
   and warnings.
 - README and viewer explain why hybrid can score below BM25 and dense, and give the real first-run
