@@ -154,6 +154,12 @@ Environment variables: `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, `MISTRAL_API_KEY`
 `LLAMA_CPP_BINARY`, `PARSEARENA_LLM_TIMEOUT` (seconds per LLM call, default 300). See [.env.example](.env.example). `parsearena parsers` lists pinned versions and
 what is installed.
 
+`--gen-questions` was tested live on 3 Nov 2026 with `--provider mistral --model ministral-8b-latest`
+on two demo PDFs: 9 questions kept out of 10 asked, all sensible and with answers found verbatim in the
+text, for about $0.001. Review the drafted file before trusting it: one answer was just `β`, too short
+to be a useful retrieval target. If `mistral-small-latest` answers 429 on your key, try
+`--model ministral-8b-latest`.
+
 Questions file:
 
 ```yaml
