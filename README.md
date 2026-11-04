@@ -41,7 +41,7 @@ The demo replays outputs recorded from a real run and computes retrieval live. N
 no Docker, no parser downloads.
 
 ```bash
-uvx --from git+https://github.com/diegoperezg7/parsearena@v0.1.3 parsearena demo
+uvx parsearena demo
 ```
 
 or from a clone:
@@ -51,7 +51,7 @@ git clone https://github.com/diegoperezg7/parsearena && cd parsearena && uv run 
 ```
 
 It writes `parsearena-demo/index.html` and opens it. The first run takes about 75 s (dependencies and a
-65 MB embedding model); later runs take about 2 s because computed embeddings are cached. `uvx parsearena` is coming to PyPI.
+65 MB embedding model); later runs take about 2 s because computed embeddings are cached.
 
 Then run it on your own PDFs:
 

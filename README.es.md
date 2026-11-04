@@ -41,7 +41,7 @@ La demo reproduce salidas grabadas de una ejecución real y calcula la recuperac
 claves, sin GPU, sin Docker y sin descargar parsers.
 
 ```bash
-uvx --from git+https://github.com/diegoperezg7/parsearena@v0.1.3 parsearena demo
+uvx parsearena demo
 ```
 
 o desde un clon:
@@ -51,7 +51,7 @@ git clone https://github.com/diegoperezg7/parsearena && cd parsearena && uv run 
 ```
 
 Escribe `parsearena-demo/index.html` y lo abre. La primera vez tarda unos 75 s (dependencias y un
-modelo de embeddings de 65 MB); después, unos 2 s, porque los embeddings ya calculados se guardan en caché. `uvx parsearena` llegará con la publicación en PyPI.
+modelo de embeddings de 65 MB); después, unos 2 s, porque los embeddings ya calculados se guardan en caché.
 
 Después, con tus PDF:
 
