@@ -238,6 +238,16 @@ parsearena. Títulos, autores, fuentes, licencias y la atribución CC BY complet
 - Métricas de estructura de tablas (TEDS)
 - Entrada docx y pptx
 
+## Parte de una serie
+
+Herramientas open source para medir agentes y LLMs con tus propios datos:
+
+- [memarena](https://github.com/diegoperezg7/memarena): Compara capas de memoria con tus propias conversaciones.
+- [commitarena](https://github.com/diegoperezg7/commitarena): Reproduce fixes reales de tu historial de git con cualquier modelo.
+- [toolbloat](https://github.com/diegoperezg7/toolbloat): Mide el coste en tokens de tu pila MCP y los errores al elegir tool.
+- [rulelab](https://github.com/diegoperezg7/rulelab): Descubre qué reglas de tu AGENTS.md se ganan sus tokens.
+- [doesitfire](https://github.com/diegoperezg7/doesitfire): Comprueba si tu SKILL.md se activa en Claude Code, Codex y OpenCode.
+
 ## Licencia
 
 [MIT](LICENSE). Las contribuciones son bienvenidas, mira [CONTRIBUTING.md](CONTRIBUTING.md).

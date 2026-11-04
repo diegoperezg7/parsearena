@@ -232,6 +232,16 @@ titles, authors, sources, licenses and the CC BY attribution are in
 - Table structure metrics (TEDS)
 - docx and pptx input
 
+## Part of a series
+
+Open source tools that evaluate agents and LLMs on your own data:
+
+- [memarena](https://github.com/diegoperezg7/memarena): Benchmark memory layers on your own conversations.
+- [commitarena](https://github.com/diegoperezg7/commitarena): Replay real bug fixes from your git history against any model.
+- [toolbloat](https://github.com/diegoperezg7/toolbloat): Measure the token cost of your MCP stack and tool-choice errors.
+- [rulelab](https://github.com/diegoperezg7/rulelab): Find which AGENTS.md rules earn their tokens.
+- [doesitfire](https://github.com/diegoperezg7/doesitfire): Test whether your SKILL.md activates in Claude Code, Codex and OpenCode.
+
 ## License
 
 [MIT](LICENSE). Contributions welcome, see [CONTRIBUTING.md](CONTRIBUTING.md).
